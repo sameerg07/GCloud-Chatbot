@@ -1,31 +1,42 @@
-// Copyright 2017, Google, Inc.
-// Licensed under the Apache License, Version 2.0 (the 'License');
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an 'AS IS' BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 'use strict';
-const http = require('http');
+var http = require('http');
+http.post = require('http-post');
+
 const host = 'api.worldweatheronline.com';
 const wwoApiKey = '55b43550d8ad4d0fa78131934170609';
-exports.weatherWebhook = (req, res) => {
+
+
+exports.ubiDotsAndWeather = (req, res) => {
+  //----------------------------------WEATHER FUNCTIONS START-----------------------------------//
   // Get the city and date from the request
-  let city = req.body.result.parameters['geo-city']; // city is a required param
-  // Get the date for the weather forecast (if present)
-  let date = '';
-  if (req.body.result.parameters['date']) {
-    date = req.body.result.parameters['date'];
-    console.log('Date: ' + date);
-  }
+  // let city = req.body.result.parameters['geo-city']; // city is a required param
+  // // Get the date for the weather forecast (if present)
+  // let date = '';
+  // if (req.body.result.parameters['date']) {
+  //   date = req.body.result.parameters['date'];
+  //   console.log('Date: ' + date);
+  // }
+  // // Call the weather API
+  // callWeatherApi(city, date).then((output) => {
+  //   // Return the results of the weather API to API.AI
+  //   res.setHeader('Content-Type', 'application/json');
+  //   res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
+  // }).catch((error) => {
+  //   // If there is an error let the user know
+  //   res.setHeader('Content-Type', 'application/json');
+  //   res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+  // });
+  //---------------------------------WEATHER FUNCTIONS END-----------------------------------//
+
+  //---------------------------------UBIDOTS FUNCTIONS START---------------------------------//
+  let objectName = req.body.result.parameters['object_name']; 
+  let objectLocation = req.body.result.parameters['object_location']; 
+  let switchState = req.body.result.parameters['switch_state'];
+
+  console.log(objectLocation,objectName,switchState);
+
   // Call the weather API
-  callWeatherApi(city, date).then((output) => {
+  callUbidotsApi(objectLocation,objectName,switchState).then((output) => {
     // Return the results of the weather API to API.AI
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
@@ -33,11 +44,13 @@ exports.weatherWebhook = (req, res) => {
     // If there is an error let the user know
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
-  });
+  });  
+  //---------------------------------UBIDOTS FUNCTIONS END-----------------------------------//
+
 };
 
-//toggleSwitchState(Device,State) --
 
+//toggleSwitchState(Device,State) --
 function callWeatherApi (city, date) {
   return new Promise((resolve, reject) => {
     // Create the path for the HTTP request to get the weather
@@ -72,4 +85,21 @@ function callWeatherApi (city, date) {
   });
 }
 
-
+function callUbidotsApi(location,device,state) {
+	return new Promise((resolve, reject) =>{
+		http.get("http://things.ubidots.com/api/v1.6/variables?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB", (res) => {
+		  console.log("Status"+res.statusCode);
+		});
+		var json={};
+		json[device] = state;
+		console.log(json,typeof(device));
+			http.post('http://things.ubidots.com/api/v1.6/devices/TEST/?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB', json, function(res){
+			 res.setEncoding('utf8');
+			 // console.log(res.statusCode);
+       
+		});
+      res.on('error', (error) => {
+        reject(error);
+      });
+	});
+}
