@@ -1,0 +1,1 @@
+https://us-central1-jarvis-api-ai.cloudfunctions.net/JarvisAPIAI
