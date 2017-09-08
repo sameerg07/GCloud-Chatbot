@@ -1,0 +1,28 @@
+{
+  "name": "ubiapp",
+  "version": "1.0.0",
+  "description": "UBI_IOT_APP_RVCE_HACK",
+  "main": "index.js",
+  "dependencies": {
+    "http-post": "^0.1.1",
+    "request": "^2.81.0",
+    "requestify": "^0.2.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rahul-RB/Team-J.A.I.git"
+  },
+  "keywords": [
+    "UBIIOTAPP"
+  ],
+  "author": "Team_J_A_I",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rahul-RB/Team-J.A.I/issues"
+  },
+  "homepage": "https://github.com/Rahul-RB/Team-J.A.I#readme"
+}

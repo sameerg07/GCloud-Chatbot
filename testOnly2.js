@@ -17,11 +17,13 @@ function callUbidotsApi(location,device,state)
 				res.on('end', () => {
 					let response = JSON.parse(body);
 					console.log(response);
-					// console.log(output);
-	    // 			resolve(output);
+					let output = res.statusCode;
+					console.log(output);
+	    			resolve(output);
 	      
 				});
-      		res.on('error', (error) => {
+      			
+      			res.on('error', (error) => {
         		reject(error);
       		});
 		});

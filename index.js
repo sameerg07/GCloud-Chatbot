@@ -8,43 +8,56 @@ const wwoApiKey = '55b43550d8ad4d0fa78131934170609';
 
 exports.ubiDotsAndWeather = (req, res) => {
   //----------------------------------WEATHER FUNCTIONS START-----------------------------------//
-  // Get the city and date from the request
-  // let city = req.body.result.parameters['geo-city']; // city is a required param
-  // // Get the date for the weather forecast (if present)
-  // let date = '';
-  // if (req.body.result.parameters['date']) {
-  //   date = req.body.result.parameters['date'];
-  //   console.log('Date: ' + date);
-  // }
-  // // Call the weather API
-  // callWeatherApi(city, date).then((output) => {
-  //   // Return the results of the weather API to API.AI
-  //   res.setHeader('Content-Type', 'application/json');
-  //   res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
-  // }).catch((error) => {
-  //   // If there is an error let the user know
-  //   res.setHeader('Content-Type', 'application/json');
-  //   res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
-  // });
+  //Get the city and date from the request
+ if(req.body.result.parameters['geo-city'])
+ {
+    let city = req.body.result.parameters['geo-city']; // city is a required param
+    // Get the date for the weather forecast (if present)
+    let date = '';
+    if (req.body.result.parameters['date']) {
+      date = req.body.result.parameters['date'];
+      console.log('Date: ' + date);
+    }
+    // Call the weather API
+    callWeatherApi(city, date).then((output) => {
+      // Return the results of the weather API to API.AI
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
+    }).catch((error) => {
+      // If there is an error let the user know
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+    });
+  }
   //---------------------------------WEATHER FUNCTIONS END-----------------------------------//
 
   //---------------------------------UBIDOTS FUNCTIONS START---------------------------------//
-  let objectName = req.body.result.parameters['object_name']; 
-  let objectLocation = req.body.result.parameters['object_location']; 
-  let switchState = req.body.result.parameters['switch_state'];
+  if(req.body.result.parameters['object_name'] || req.body.result.parameters['object_location'] || req.body.result.parameters['switch_state'])
+  {
+    let objectName = req.body.result.parameters['object_name']; //light,fan
+    let objectLocation = req.body.result.parameters['object_location'];  //kitchen,bedroom
+    let switchState = req.body.result.parameters['switch_state']; //switch on/off
+    let fanSpeed = req.body.result.parameters['fan_speed']; //switch on/off'
+    console.log(fanSpeed);
+    // alert(fanSpeed);
+    if(switchState=="switch on")
+      switchState=1;
+    else
+      switchState=0;
+    fanSpeed=parseInt(fanSpeed);
+    console.log(objectLocation,objectName,switchState,fanSpeed);
 
-  console.log(objectLocation,objectName,switchState);
-
-  // Call the weather API
-  callUbidotsApi(objectLocation,objectName,switchState).then((output) => {
-    // Return the results of the weather API to API.AI
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
-  }).catch((error) => {
-    // If there is an error let the user know
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
-  });  
+    // Call the weather API
+    callUbidotsApi(objectLocation,objectName,switchState).then((output) => {
+      // Return the results of the weather API to API.AI
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
+    }).catch((error) => {
+      // If there is an error let the user know
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify({ 'speech': error, 'displayText': error }));
+    });  
+  }
   //---------------------------------UBIDOTS FUNCTIONS END-----------------------------------//
 
 };
@@ -85,21 +98,52 @@ function callWeatherApi (city, date) {
   });
 }
 
-function callUbidotsApi(location,device,state) {
-	return new Promise((resolve, reject) =>{
-		http.get("http://things.ubidots.com/api/v1.6/variables?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB", (res) => {
-		  console.log("Status"+res.statusCode);
-		});
-		var json={};
-		json[device] = state;
-		console.log(json,typeof(device));
-			http.post('http://things.ubidots.com/api/v1.6/devices/TEST/?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB', json, function(res){
-			 res.setEncoding('utf8');
-			 // console.log(res.statusCode);
-       
-		});
-      res.on('error', (error) => {
-        reject(error);
+function callUbidotsApi(location,device,state,fanSpeed) {
+  return new Promise((resolve, reject) =>{
+    http.get("http://things.ubidots.com/api/v1.6/variables?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB", (res) => {
+      console.log("Status"+res.statusCode);
+    });
+    var notFan=0;
+    var opState;
+    if(location == "kitchen"){
+      if(device=="fan")
+        notFan=1;
+      else
+        device = "kitchen_"+device;
+    }
+
+    else{
+      if(device=="fan")
+        device = "bedroom_"+device+"_speed";
+      else
+        device = "bedroom_"+device;
+    }
+
+    var json={};
+    if(device=="fan" && location=="bedroom")
+      json[device]=fanSpeed;
+    else
+      json[device] = state;
+
+    if(state==0)
+      opState="off";
+    else
+      opState="on";
+
+      http.post('http://things.ubidots.com/api/v1.6/devices/TEST/?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB', json, function(res){
+        res.setEncoding('utf8');
+        let body = '';
+        res.on('data', (d) => { body += d; });
+        res.on('end', () => {
+          let response = JSON.parse(body);
+          console.log(response);
+          let output = "Device switched "+opState+" successfully \n The status code is:"+res.statusCode;
+          console.log(output);
+          resolve(output);
+        });
+        res.on('error', (error) => {
+          reject(error);
+        });
       });
-	});
+  });
 }
