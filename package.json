@@ -4,6 +4,7 @@
   "description": "UBI_IOT_APP_RVCE_HACK",
   "main": "index.js",
   "dependencies": {
+    "@google-cloud/vision": "^0.12.0",
     "http-post": "^0.1.1",
     "request": "^2.81.0",
     "requestify": "^0.2.5"

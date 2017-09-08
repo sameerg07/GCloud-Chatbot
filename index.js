@@ -44,11 +44,20 @@ exports.ubiDotsAndWeather = (req, res) => {
       switchState=1;
     else
       switchState=0;
-    fanSpeed=parseInt(fanSpeed);
+    
+      switch(fanSpeed)
+      {
+        case "high": fanSpeed=3;break;
+        case "medium":fanSpeed=2;break;
+        case "low": fanSpeed=1;break;
+        case "off": fanSpeed=0;break;
+        default: fanSpeed=4;
+      }
+
     console.log(objectLocation,objectName,switchState,fanSpeed);
 
     // Call the weather API
-    callUbidotsApi(objectLocation,objectName,switchState).then((output) => {
+    callUbidotsApi(objectLocation,objectName,switchState,fanSpeed).then((output) => {
       // Return the results of the weather API to API.AI
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify({ 'speech': output, 'displayText': output }));
@@ -120,7 +129,7 @@ function callUbidotsApi(location,device,state,fanSpeed) {
     }
 
     var json={};
-    if(device=="fan" && location=="bedroom")
+    if(device=="bedroom_fan_speed")
       json[device]=fanSpeed;
     else
       json[device] = state;

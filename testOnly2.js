@@ -1,33 +1,25 @@
-var http = require('http');
-http.post = require('http-post');
+// Imports the Google Cloud client library
+const Vision = require('@google-cloud/vision');
 
-function callUbidotsApi(location,device,state) 
-{
-	return new Promise((resolve, reject) =>{
-		http.get("http://things.ubidots.com/api/v1.6/variables?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB", (res) => {
-		  console.log("Status"+res.statusCode);
-		});
-		var json={};
-		json[device] = state;
-		console.log(json,typeof(device));
-			http.post('http://things.ubidots.com/api/v1.6/devices/TEST/?token=A1E-v8eYHn72rYMlAHfc1PsfOh87HFQnyB', json, function(res){
-				res.setEncoding('utf8');
-				let body = '';
-				res.on('data', (d) => { body += d; });
-				res.on('end', () => {
-					let response = JSON.parse(body);
-					console.log(response);
-					let output = res.statusCode;
-					console.log(output);
-	    			resolve(output);
-	      
-				});
-      			
-      			res.on('error', (error) => {
-        		reject(error);
-      		});
-		});
-	});
-}
+// Instantiates a client
+const vision = Vision();
 
-callUbidotsApi("Bedroom","value1",1234);
+// The path to the local image file, e.g. "/path/to/image.png"
+// const fileName = '/path/to/image.png';
+
+vision.faceDetection({ source: { filename: fileName } })
+  .then((results) => {
+    const faces = results[0].faceAnnotations;
+
+    console.log('Faces:');
+    faces.forEach((face, i) => {
+      console.log(`  Face #${i + 1}:`);
+      console.log(`    Joy: ${face.joyLikelihood}`);
+      console.log(`    Anger: ${face.angerLikelihood}`);
+      console.log(`    Sorrow: ${face.sorrowLikelihood}`);
+      console.log(`    Surprise: ${face.surpriseLikelihood}`);
+    });
+  })
+  .catch((err) => {
+    console.error('ERROR:', err);
+  });
