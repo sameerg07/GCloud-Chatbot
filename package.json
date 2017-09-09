@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@google-cloud/vision": "^0.12.0",
+    "apiai": "^4.0.3",
     "http-post": "^0.1.1",
     "node-webcam": "^0.4.3",
     "request": "^2.81.0",
