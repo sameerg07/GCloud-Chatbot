@@ -1,25 +1,19 @@
-// Imports the Google Cloud client library
-const Vision = require('@google-cloud/vision');
+var NodeWebcam = require( "node-webcam" );
+//Default options
+var opts = {
+    //Picture related
+    width: 1280,
+    height: 720,
+    quality: 100,
+    delay: 0,
+    saveShots: true,
+    output: "jpeg",
+    device: false,
+    callbackReturn: "location",
+    verbose: false,
+};
 
-// Instantiates a client
-const vision = Vision();
-
-// The path to the local image file, e.g. "/path/to/image.png"
-// const fileName = '/path/to/image.png';
-
-vision.faceDetection({ source: { filename: fileName } })
-  .then((results) => {
-    const faces = results[0].faceAnnotations;
-
-    console.log('Faces:');
-    faces.forEach((face, i) => {
-      console.log(`  Face #${i + 1}:`);
-      console.log(`    Joy: ${face.joyLikelihood}`);
-      console.log(`    Anger: ${face.angerLikelihood}`);
-      console.log(`    Sorrow: ${face.sorrowLikelihood}`);
-      console.log(`    Surprise: ${face.surpriseLikelihood}`);
-    });
-  })
-  .catch((err) => {
-    console.error('ERROR:', err);
-  });
+var Webcam = NodeWebcam.create( opts );
+NodeWebcam.capture( "test_picture", opts, function( err, data ) {
+  console.log(data);
+});
