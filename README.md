@@ -6,9 +6,9 @@ Aim: As described above, develop an IoT system, where you can switch on your hom
 
 Why implement another home automation system, when thousands of smaller and potentially faster ones exist? 
 -- The home automation systems existing these days are no doubt good, but they lack the following features: 
-  -- costly (even a small switch costs rs 1000 + , due to redundant wifi modules in each switch).
-  -- Not expandable.
-  -- Not serviceable easily.
+  - costly (even a small switch costs rs 1000 + , due to redundant wifi modules in each switch).
+  - Not expandable.
+  - Not serviceable easily.
 
 Our alternative to the existing ones is to overcome the difficulties mentioned above. 
 
